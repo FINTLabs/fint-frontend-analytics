@@ -1,7 +1,16 @@
+import { Box } from "@navikt/ds-react";
+
 export default function Footer() {
     return (
         <footer>
-            <p>Footer</p>
+            <Box
+                background="neutral-softA"
+                padding="space-16"
+                borderRadius="8"
+                shadow="dialog"
+            >
+                POC Frontend Analytics (Jennifer)
+            </Box>
         </footer>
     );
 }
