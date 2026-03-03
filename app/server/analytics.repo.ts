@@ -257,7 +257,8 @@ export async function getLatestEvents(limit = 50) {
     //     [limit]
     // );
 
-    return listOfEvents.slice(0, limit);
+    var returnSorted = listOfEvents.sort((a, b) => (a.ts > b.ts ? -1 : 1));
+    return returnSorted.slice(0, limit);
 }
 const listOfEvents: AnalyticsEvent[] = [];
 let nextId = 1;

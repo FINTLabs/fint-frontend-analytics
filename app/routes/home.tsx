@@ -14,6 +14,7 @@ import {
   FingerButtonIcon,
   MagnifyingGlassCheckmarkIcon,
 } from "@navikt/aksel-icons";
+import {formatTs} from "~/utils/time";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -104,7 +105,7 @@ export default function Home() {
 
   return (
     <>
-      <h1>Analytics events</h1>
+      <h1>Latest events</h1>
 
       <HGrid columns={3} gap="space-24" margin="space-24" >
         {totalEventsPerApp.map((row) => (
@@ -168,7 +169,7 @@ export default function Home() {
                   </HStack>
                 </Table.DataCell>
                 <Table.DataCell>
-                  {new Date(row.ts).toLocaleString()}
+                  {formatTs(row.ts)}
                 </Table.DataCell>
                 <Table.DataCell>{row.app}</Table.DataCell>
                 <Table.DataCell>{row.path ?? "-"}</Table.DataCell>

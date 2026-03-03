@@ -16,7 +16,6 @@ function corsHeaders(request: Request): Headers {
   return headers;
 }
 
-// Handle preflight
 export async function loader({ request }: { request: Request }) {
   if (request.method === "OPTIONS") {
     return new Response(null, {
@@ -26,7 +25,6 @@ export async function loader({ request }: { request: Request }) {
   }
   return new Response("Method Not Allowed", { status: 405 });
 }
-
 
 
 export async function action({ request }: ActionFunctionArgs) {
@@ -40,16 +38,15 @@ export async function action({ request }: ActionFunctionArgs) {
     return new Response("Unauthorized", { status: 401 });
   }
 
-  const body = (await request.json().catch(() => null)) as
-    | { events?: IncomingEvent[] }
-    | IncomingEvent
-    | null;
+  const body = (await request.json().catch(() => null)) as unknown;
 
-  const events: IncomingEvent[] = Array.isArray((body as any)?.events)
-    ? ((body as any).events as IncomingEvent[])
-    : body
-      ? [body as IncomingEvent]
-      : [];
+  const events: IncomingEvent[] = Array.isArray(body)
+      ? (body as IncomingEvent[])
+      : body && typeof body === "object" && Array.isArray((body as any).events)
+          ? ((body as any).events as IncomingEvent[])
+          : body
+              ? [body as IncomingEvent]
+              : [];
 
   if (events.length === 0) return new Response("Bad Request", { status: 400 });
   if (events.length > 10)

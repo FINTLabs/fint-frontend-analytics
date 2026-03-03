@@ -11,7 +11,7 @@ export default function Header() {
             >
                 <HStack gap={"space-4"} align={"center"}>
                     <NovariIKS width="150px" />
-                    <h1 >Fint Analytics</h1>
+                    <h1 >Fint Frontend Analytics</h1>
                 </HStack>
             </Box>
         </header>
