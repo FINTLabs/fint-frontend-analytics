@@ -5,10 +5,7 @@ import {
   useNavigate,
   useSearchParams,
 } from "react-router";
-import {
-  getHitsPerDayByApp,
-  getPageViewsByAppAndPath,
-} from "~/server/analytics.repo";
+
 import { parseRange } from "~/utils/range";
 import ViewsLineChart from "~/components/ViewsLineChart";
 
@@ -16,10 +13,13 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   const url = new URL(request.url);
   const { from, to, label } = parseRange(url);
 
-  const [rows, chartRows] = await Promise.all([
-    getPageViewsByAppAndPath({ from, to }),
-    getHitsPerDayByApp({ from, to }),
-  ]);
+  console.log("from", from, "to", to);
+  // const [rows, chartRows] = await Promise.all([
+  //   getPageViewsByAppAndPath({ from, to }),
+  //   getHitsPerDayByApp({ from, to }),
+  // ]);
+    const rows: never[] = [];
+    const chartRows: never[] = [];
 
   return {
     rows,
