@@ -1,87 +1,141 @@
-# Welcome to React Router!
+# FINT Frontend Analytics
 
-A modern, production-ready template for building full-stack React applications using React Router.
+Analytics collector and dashboard for frontend events.
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/remix-run/react-router-templates/tree/main/default)
+This app stores analytics events in Postgres and provides:
+- an ingestion endpoint (`POST /api/events`)
+- a dashboard with latest events and aggregates (`/`)
 
-## Features
+## Tech Stack
 
-- 🚀 Server-side rendering
-- ⚡️ Hot Module Replacement (HMR)
-- 📦 Asset bundling and optimization
-- 🔄 Data loading and mutations
-- 🔒 TypeScript by default
-- 🎉 TailwindCSS for styling
-- 📖 [React Router docs](https://reactrouter.com/)
+- React Router (SSR)
+- React + TypeScript
+- PostgreSQL (`pg`)
+- NAV design system (`@navikt/ds-react`)
+- Recharts
 
-## Getting Started
+## Local Development
 
-### Installation
-
-Install the dependencies:
+### 1) Install dependencies
 
 ```bash
 npm install
 ```
 
-### Development
+### 2) Start Postgres
 
-Start the development server with HMR:
+Using Docker Compose:
+
+```bash
+docker compose up -d db
+```
+
+The default local database credentials are:
+- database: `analytics`
+- user: `analytics`
+- password: `analytics`
+- host: `localhost`
+- port: `5432`
+
+### 3) Configure environment
+
+Create `.env` in the project root:
+
+```bash
+DATABASE_URL=postgres://analytics:analytics@localhost:5432/analytics
+# Optional: require this token on POST /api/events
+ANALYTICS_TOKEN=change-me
+```
+
+### 4) Run the app
 
 ```bash
 npm run dev
 ```
 
-Your application will be available at `http://localhost:5173`.
+App is available at `http://localhost:5173`.
 
-## Building for Production
+## Routes
 
-Create a production build:
+- `GET /` - analytics dashboard (latest events + totals per app and tenant)
+- `GET /views` - page views report with range selector and chart
+- `POST /api/events` - ingest one event or batch
+- `OPTIONS /api/events` - CORS preflight
+
+## Event Ingestion API
+
+`POST /api/events` accepts either:
+- a single event object, or
+- `{ "events": [ ... ] }`
+
+### Event shape
+
+```json
+{
+  "ts": "2026-02-27T10:15:00.000Z",
+  "app": "fint-min-app",
+  "type": "page_view",
+  "path": "/home",
+  "element": "search-button",
+  "tenant": "my-tenant",
+  "meta": {
+    "query": "search-params"
+  }
+}
+```
+
+Notes:
+- `app` and `type` are required
+- `type` supports `page_view`, `button_click`, `search`
+- max 10 events per request
+- if `ANALYTICS_TOKEN` is set, send it as `x-analytics-token`
+
+### Example requests
+
+Single event:
 
 ```bash
-npm run build
+curl -X POST "http://localhost:5173/api/events" \
+  -H "Content-Type: application/json" \
+  -H "x-analytics-token: change-me" \
+  -d '{
+    "app": "fint-min-app",
+    "type": "page_view",
+    "path": "/"
+  }'
 ```
 
-## Deployment
-
-### Docker Deployment
-
-To build and run using Docker:
+Batch:
 
 ```bash
-docker build -t my-app .
-
-# Run the container
-docker run -p 3000:3000 my-app
+curl -X POST "http://localhost:5173/api/events" \
+  -H "Content-Type: application/json" \
+  -H "x-analytics-token: change-me" \
+  -d '{
+    "events": [
+      { "app": "fint-min-app", "type": "page_view", "path": "/" },
+      { "app": "fint-min-app", "type": "button_click", "element": "save" }
+    ]
+  }'
 ```
 
-The containerized application can be deployed to any platform that supports Docker, including:
+## Scripts
 
-- AWS ECS
-- Google Cloud Run
-- Azure Container Apps
-- Digital Ocean App Platform
-- Fly.io
-- Railway
+- `npm run dev` - start dev server
+- `npm run build` - production build
+- `npm run start` - run built server
+- `npm run typecheck` - React Router typegen + TypeScript check
 
-### DIY Deployment
+## Docker Compose (App + DB)
 
-If you're familiar with deploying Node applications, the built-in app server is production-ready.
+To run both services:
 
-Make sure to deploy the output of `npm run build`
-
-```
-├── package.json
-├── package-lock.json (or pnpm-lock.yaml, or bun.lockb)
-├── build/
-│   ├── client/    # Static assets
-│   └── server/    # Server-side code
+```bash
+docker compose up --build
 ```
 
-## Styling
+This starts:
+- `db` on `5432`
+- `app` on `3000`
 
-This template comes with [Tailwind CSS](https://tailwindcss.com/) already configured for a simple default starting experience. You can use whatever CSS framework you prefer.
-
----
-
-Built with ❤️ using React Router.
+When using Compose app service, `DATABASE_URL` points to the `db` service internally.
