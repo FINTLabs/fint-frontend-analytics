@@ -1,12 +1,13 @@
-import type { Route } from "./+types/home";
-import {Box, Button, HGrid, HStack, InfoCard, List, Popover, Table} from "@navikt/ds-react";
-import { type LoaderFunctionArgs, useLoaderData } from "react-router";
+import type {Route} from "./+types/home";
+import {Box, Button, HGrid, HStack, InfoCard, Popover, Table} from "@navikt/ds-react";
+import {useLoaderData} from "react-router";
 import {
   type AnalyticsEvent,
-  getLatestEvents, type TotalEventsPerAppWithTypesRow,
+  getLatestEvents,
+  type TotalEventsPerAppWithTypesRow,
   type TotalEventsPerTenantRow,
 } from "~/server/analytics.repo";
-import { type MouseEvent, type ReactElement, useState } from "react";
+import {type MouseEvent, type ReactElement, useState} from "react";
 import {
   ExclamationmarkTriangleIcon,
   FileCodeIcon,
@@ -21,7 +22,7 @@ export function meta({}: Route.MetaArgs) {
   ];
 }
 
-export const loader = async ({ request }: LoaderFunctionArgs) => {
+export const loader = async () => {
   const rows = await getLatestEvents(50);
   // const totalEventsPerApp = await getTotalEventsPerAppWithTypes({
   //   from: new Date("2021-01-01"),
@@ -31,6 +32,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   //   from: new Date("2021-01-01"),
   //   to: new Date(),
   // });
+
   const totalEventsPerApp: never[] = [];
   const totalEventsPerTenant: never[] = [];
 
@@ -167,7 +169,7 @@ export default function Home() {
                 </Table.DataCell>
                 <Table.DataCell>
                   {new Date(row.ts).toLocaleString()}
-                </Table.DataCell>{" "}
+                </Table.DataCell>
                 <Table.DataCell>{row.app}</Table.DataCell>
                 <Table.DataCell>{row.path ?? "-"}</Table.DataCell>
                 <Table.DataCell>{row.element ?? "-"}</Table.DataCell>
