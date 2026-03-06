@@ -10,6 +10,12 @@ export type HitsPerDayByAppRow = {
   hits: number;
 };
 
+export type PageViewsByDayAppRow = {
+  day: string;
+  app: string;
+  views: number;
+};
+
 export type AnalyticsEvent = {
   id: number;
   ts: string;

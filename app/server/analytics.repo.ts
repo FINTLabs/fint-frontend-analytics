@@ -4,6 +4,7 @@ import type {
     AppDashboardSummary,
     AppViewsSummary,
     IncomingEvent,
+    PageViewsByDayAppRow,
     TenantDashboardSummary,
     TenantViewsSummary,
 } from "~/types/analytics";
@@ -15,6 +16,7 @@ export type {
     HitsPerDayByAppRow,
     IncomingEvent,
     PageViewsRow,
+    PageViewsByDayAppRow,
     TenantDashboardSummary,
     TenantViewsSummary,
     TotalEventsPerAppWithTypesRow,
@@ -268,6 +270,33 @@ export async function getAppViewsSummary(params: {
             totalViews: counts.get(app) ?? 0,
         }))
         .sort((a, b) => b.totalViews - a.totalViews || a.app.localeCompare(b.app));
+}
+
+export async function getPageViewsByDayByApp(params: {
+    from: Date;
+    to: Date;
+}): Promise<PageViewsByDayAppRow[]> {
+    const { from, to } = params;
+    const counts = new Map<string, number>();
+
+    for (const event of listOfEvents) {
+        if (event.type !== "page_view") continue;
+
+        const ts = new Date(event.ts);
+        if (Number.isNaN(ts.getTime())) continue;
+        if (ts < from || ts >= to) continue;
+
+        const day = event.ts.slice(0, 10);
+        const key = `${day}::${event.app}`;
+        counts.set(key, (counts.get(key) ?? 0) + 1);
+    }
+
+    return Array.from(counts.entries())
+        .map(([key, views]) => {
+            const [day, app] = key.split("::");
+            return { day, app, views };
+        })
+        .sort((a, b) => a.day.localeCompare(b.day) || a.app.localeCompare(b.app));
 }
 
 export async function listTenants() {
